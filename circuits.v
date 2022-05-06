@@ -1172,3 +1172,120 @@ module top_module(
             end
         end    
 endmodule
+
+//shifter Exams/m2014 q4k
+module top_module (
+    input clk,
+    input resetn,   // synchronous reset
+    input in,
+    output out);
+
+    reg r0,r1,r2,r3;
+    assign out = r3;
+    always@(posedge clk)begin
+        if(~resetn)
+            {r0,r1,r2,r3} <= 4'b0000;
+        else begin
+            {r3,r2,r1,r0} <= {r2,r1,r0,in};
+        end
+    end
+endmodule
+
+//Exams/2014 q4b
+module top_module (
+    input [3:0] SW,
+    input [3:0] KEY,
+    output [3:0] LEDR
+); //
+MUXDFF inst3(KEY[0],KEY[3],KEY[1],SW[3],KEY[2],LEDR[3]);
+MUXDFF inst2(KEY[0],LEDR[3],KEY[1],SW[2],KEY[2],LEDR[2]);
+MUXDFF inst1(KEY[0],LEDR[2],KEY[1],SW[1],KEY[2],LEDR[1]);
+MUXDFF inst0(KEY[0],LEDR[1],KEY[1],SW[0],KEY[2],LEDR[0]);
+endmodule
+
+module MUXDFF (
+    input clk,
+    input w,
+    input E,
+    input R,
+    input L,
+    output Q
+);
+wire D;
+assign D = L?R:(E?w:Q);
+always@(posedge clk)begin
+    Q <= D;
+end
+
+endmodule
+
+//3-input lut
+module top_module (
+    input clk,
+    input enable,
+    input S,
+    input A, B, C,
+    output Z ); 
+
+reg [7:0] Q;
+//shift logical
+always@(posedge clk)begin
+    if(enable)
+        Q <= {Q[6:0],S};
+end
+always@(*)begin
+    case({A,B,C})
+        3'b000:Z <= Q[0];
+        3'b001:Z <= Q[1];
+        3'b010:Z <= Q[2];
+        3'b011:Z <= Q[3];
+        3'b100:Z <= Q[4];
+        3'b101:Z <= Q[5];
+        3'b110:Z <= Q[6];
+        3'b111:Z <= Q[7];
+    endcase
+end
+endmodule
+
+//rule 90
+module top_module(
+    input clk,
+    input load,
+    input [511:0] data,
+    output [511:0] q ); 
+always@(posedge clk)begin
+    if(load)
+        q <= data;
+    else begin
+        q[0] <= q[1];
+        q[511] <= q[510];
+        for(int i=1;i<511;i++)begin
+            q[i] <= q[i-1] ^ q[i+1];
+        end
+    end
+end
+endmodule
+
+//rule 110
+module top_module(
+    input clk,
+    input load,
+    input [511:0] data,
+    output [511:0] q
+); 
+    wire [511:0] q_left, q_right;
+    assign q_left = {1'b0,q[511:1]};
+    assign q_right = {q[510:0],1'b0};
+    
+    
+    always@(posedge clk) begin
+        if(load)
+            q <= data;
+        else begin
+            q <= (q & ~q_right) | (~q_left & q) | (~q & q_right);
+        end
+    end
+endmodule
+
+//conwaylife
+
